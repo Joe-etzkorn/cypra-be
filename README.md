@@ -19,7 +19,9 @@ cp .env.example .env
 
 npm run dev
 
-npm run migrate up
+npm run down-migrate
+
+npm run migrate-and-seed
 ```
 
 # test account

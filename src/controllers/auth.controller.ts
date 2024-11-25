@@ -27,7 +27,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         refreshToken: tokens.refreshToken,
       });
     } else {
-      sendResponse(res, 401, false, 'Invalid credentials');
+      sendResponse(res, 400, false, 'Invalid credentials');
     }
   } catch (err) {
     console.error('Login error:', err);
