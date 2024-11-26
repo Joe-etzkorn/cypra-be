@@ -9,10 +9,6 @@ module.exports = {
         autoIncrement: true,
         allowNull: false,
       },
-      username: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
       email: {
         type: Sequelize.STRING,
         allowNull: false,
@@ -22,15 +18,49 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
+      roleId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'roles',
+          key: 'id'
+        }
+      },
+      parentId: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+        references: {
+          model: 'users',
+          key: 'id'
+        }
+      },
+      firstName: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+      lastName: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+      companyName: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+      clientId: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+      clientSecret: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
       createdAt: {
         type: Sequelize.DATE,
         allowNull: false,
-        defaultValue: Sequelize.NOW,
       },
       updatedAt: {
         type: Sequelize.DATE,
         allowNull: false,
-        defaultValue: Sequelize.NOW,
       },
     });
   },
