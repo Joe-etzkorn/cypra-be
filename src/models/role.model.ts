@@ -10,6 +10,11 @@ class Role extends Model {
 
 Role.init(
   {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      allowNull: false,
+    },
     name: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -30,7 +35,7 @@ Role.init(
     sequelize,
     modelName: 'Role',
     tableName: 'roles',
-  }
+  },
 );
 
 export default Role;

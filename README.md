@@ -17,6 +17,8 @@ CREATE DATABASE cypra OWNER postgres;
 ```bash
 cp .env.example .env
 
+npm install 
+
 npm run dev
 
 npm run down-migrate
@@ -28,4 +30,6 @@ npm run migrate-and-seed
 
 ```bash
 admin@gmail.com / 12345
+
+superadmin@gmail.com / 12345
 ```

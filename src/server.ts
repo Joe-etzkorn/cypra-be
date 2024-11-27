@@ -1,10 +1,14 @@
 import app from './app';
 import dotenv from 'dotenv';
 import { Pool } from 'pg';
+import { setupAssociations } from './models/associations';
 
 dotenv.config();
 
 const PORT = process.env.PORT || 8080;
+
+// Setup database associations
+setupAssociations();
 
 // PostgreSQL Database Connection
 const dbPool = new Pool({
@@ -14,6 +18,7 @@ const dbPool = new Pool({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
 });
+
 // Test Database Connection
 dbPool.connect()
   .then(() => console.log('Connected to PostgreSQL database'))

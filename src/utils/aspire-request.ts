@@ -1,24 +1,43 @@
-import { Message } from "../enums/message.enum";
+import { Message } from '../enums/message.enum';
 
-const sendAspireRequest = async (method: string, endpoint: string, body: object) => {
-    try {
-      const res = await fetch(`${process.env.ASPIRE_API_URL}${endpoint}`, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        method,
-        body: JSON.stringify(body),
-      });
-  
-      if (!res.ok) {
-        const error = await res.json();
-        throw error;
-      }
-      return res.json();
-    } catch (error) {
-      console.error('Error in Aspire request:', error);
-      throw new Error(Message.INVALID_CREDENTIALS);
+type HttpMethod = 'GET' | 'POST' | 'PUT';
+
+interface RequestBody {
+  [key: string]: any; // This represents any object as the body
+}
+
+const sendAspireRequest = async (
+  method: HttpMethod,
+  endpoint: string,
+  body: RequestBody | null = null,
+) => {
+  try {
+    const options: RequestInit = {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      method,
+    };
+
+    // If the method is POST or PUT, add the body to the request
+    if (body) {
+      options.body = JSON.stringify(body);
     }
-  };
+
+    const res = await fetch(
+      `${process.env.ASPIRE_API_URL}${endpoint}`,
+      options,
+    );
+
+    if (!res.ok) {
+      const error = await res.json();
+      throw error;
+    }
+    return res.json();
+  } catch (error) {
+    console.error('Error in Aspire request:', error);
+    throw new Error(Message.INVALID_CREDENTIALS);
+  }
+};
 
 export default sendAspireRequest;

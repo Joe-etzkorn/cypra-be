@@ -1,6 +1,8 @@
 import { Model, DataTypes } from 'sequelize';
 import sequelize from '../utils/db';
 import Role from './role.model';
+import RequestedAccount from './requestedAccount.model';
+import UserInvitation from './userInvitation.model';
 
 class User extends Model {
   public id!: number;
@@ -13,12 +15,18 @@ class User extends Model {
   public parentId!: number;
   public clientId!: string;
   public clientSecret!: string;
+  public isAdministrator!: boolean;
   public createdAt!: Date;
   public updatedAt!: Date;
 }
 
 User.init(
   {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      allowNull: false,
+    },
     email: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -45,6 +53,16 @@ User.init(
       allowNull: false,
       field: 'companyName',
     },
+    clientId: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      field: 'clientId',
+    },
+    clientSecret: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      field: 'clientSecret',
+    },
     roleId: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -55,15 +73,11 @@ User.init(
       allowNull: true,
       field: 'parentId',
     },
-    clientId: {
-      type: DataTypes.STRING,
+    isAdministrator: {
+      type: DataTypes.INTEGER,
       allowNull: false,
-      field: 'clientId',
-    },
-    clientSecret: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      field: 'clientSecret',
+      field: 'isAdministrator',
+      defaultValue: 1,
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -83,8 +97,5 @@ User.init(
     timestamps: true,
   },
 );
-
-User.belongsTo(Role, { foreignKey: 'roleId' });
-User.belongsTo(User, { as: 'parent', foreignKey: 'parentId' });
 
 export default User;
