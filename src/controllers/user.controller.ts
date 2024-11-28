@@ -9,7 +9,10 @@ interface AuthenticatedRequest extends Request {
   user?: JwtPayload;
 }
 
-export const create = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+export const create = async (
+  req: AuthenticatedRequest,
+  res: Response,
+): Promise<void> => {
   const schema = Joi.object({
     email: Joi.string().email().required(),
     password: Joi.string()
@@ -18,20 +21,28 @@ export const create = async (req: AuthenticatedRequest, res: Response): Promise<
       .required()
       .messages({
         'string.min': 'Password must be at least 8 characters',
-        'string.pattern.base': 'Password must contain at least one uppercase letter, one special character, and one number',
-        'any.required': 'Password is required'
+        'string.pattern.base':
+          'Password must contain at least one uppercase letter, one special character, and one number',
+        'any.required': 'Password is required',
       }),
     firstName: Joi.string().required(),
     lastName: Joi.string().required(),
     companyName: Joi.string().required(),
     clientId: Joi.string().optional(),
-    clientSecret: Joi.string().optional()
+    clientSecret: Joi.string().optional(),
   });
 
   try {
     const { error } = schema.validate(req.body);
     if (error) {
-      sendResponse(res, 400, false, Message.VALIDATION_ERROR, undefined, error.details);
+      sendResponse(
+        res,
+        400,
+        false,
+        Message.VALIDATION_ERROR,
+        undefined,
+        error.details,
+      );
       return;
     }
 

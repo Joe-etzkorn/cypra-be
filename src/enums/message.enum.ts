@@ -1,4 +1,5 @@
 export enum Message {
+  COMMON_ERROR = 'Something went wrong. Please try again',
   UNAUTHORIZED = 'Unauthorized',
   EMAIL_ALREADY_EXISTS = 'Email already exists',
   CREDENTIALS_REQUIRED = 'Client credentials are required',
@@ -7,5 +8,8 @@ export enum Message {
   CREATE_USER_ERROR = 'Error creating user',
   CREATE_USER_SUCCESS = 'User created successfully',
   USER_NOT_FOUND = 'User not found',
-  INVALID_CREDENTIALS = 'Invalid credentials'
+  INVALID_CREDENTIALS = 'Invalid credentials',
+  CREATE_REQUEST_ACCOUNT_ERROR = 'Something went wrong. Please try again',
+  CREATE_REQUEST_ACCOUNT_SUCCESS = 'Thanks for reaching out to us. We will get back to you soon',
+  ACCOUNT_REQUEST_ALREADY_EXISTS = 'You have submitted with this email already. we will contact you soon',
 }

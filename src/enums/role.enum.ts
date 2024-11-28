@@ -3,3 +3,9 @@ export enum Role {
   ADMIN = 2,
   USER = 3
 }
+
+export enum AwsRole {
+  SUPER_ADMIN = 'SuperAdmin',
+  ADMIN = 'Admin',
+  USER = 'User',
+}

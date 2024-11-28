@@ -59,6 +59,10 @@ module.exports = {
         allowNull: false,
         defaultValue: 1,
       },
+      userCognitoId: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
       createdAt: {
         type: Sequelize.DATE,
         allowNull: false,

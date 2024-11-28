@@ -1,8 +1,5 @@
 import { Model, DataTypes } from 'sequelize';
 import sequelize from '../utils/db';
-import Role from './role.model';
-import RequestedAccount from './requestedAccount.model';
-import UserInvitation from './userInvitation.model';
 
 class User extends Model {
   public id!: number;
@@ -13,20 +10,16 @@ class User extends Model {
   public companyName!: string;
   public roleId!: number;
   public parentId!: number;
-  public clientId!: string;
-  public clientSecret!: string;
+  public clientId?: string;
+  public clientSecret?: string;
   public isAdministrator!: boolean;
+  public userCognitoId!: string;
   public createdAt!: Date;
   public updatedAt!: Date;
 }
 
 User.init(
   {
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      allowNull: false,
-    },
     email: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -55,12 +48,12 @@ User.init(
     },
     clientId: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
       field: 'clientId',
     },
     clientSecret: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
       field: 'clientSecret',
     },
     roleId: {
@@ -78,6 +71,10 @@ User.init(
       allowNull: false,
       field: 'isAdministrator',
       defaultValue: 1,
+    },
+    userCognitoId: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     createdAt: {
       type: DataTypes.DATE,

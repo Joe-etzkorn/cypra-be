@@ -1,6 +1,5 @@
-import { DataTypes, Model, Optional } from 'sequelize';
+import { DataTypes, Model } from 'sequelize';
 import sequelize from '../utils/db';
-import User from './user.model';
 
 class UserInvitation extends Model {
   public id!: number;
