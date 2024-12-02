@@ -1,34 +1,90 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt, { JwtPayload } from 'jsonwebtoken';
+import AWS from 'aws-sdk';
 import { sendResponse } from '../utils/response';
+import { Message } from '../enums/message.enum';
+import { AwsRole } from '../enums/role.enum';
 
-const ACCESS_TOKEN_SECRET =
-  process.env.ACCESS_TOKEN_SECRET || 'cypra-access-token';
+const cognito = new AWS.CognitoIdentityServiceProvider({
+  region: process.env.AWS_REGION,
+  credentials: new AWS.Credentials(
+    process.env.AWS_ACCESS_KEY_ID!,
+    process.env.AWS_SECRET_ACCESS_KEY!,
+    process.env.AWS_SESSION_TOKEN,
+  ),
+});
 
 interface AuthenticatedRequest extends Request {
-  user?: string | JwtPayload;
+  user?: string | object;
 }
 
-export const authenticateToken = (
+const authenticateUser = async (
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction,
-): void => {
+  role: AwsRole,
+): Promise<void> => {
   const authHeader = req.headers['authorization'];
   const token = authHeader?.split(' ')[1];
 
   if (!token) {
-    sendResponse(res, 401, false, 'Unauthorized.');
+    sendResponse(res, 401, false, Message.UNAUTHORIZED);
     return;
   }
 
-  jwt.verify(token, ACCESS_TOKEN_SECRET, (err, user) => {
-    if (err) {
-      sendResponse(res, 401, false, 'Unauthorized.');
+  try {
+    const params = {
+      AccessToken: token,
+    };
+
+    const userData = await cognito.getUser(params).promise();
+
+    const groupParams = {
+      UserPoolId: process.env.COGNITO_USER_POOL_ID!,
+      Username: userData.Username,
+    };
+    const groupData = await cognito
+      .adminListGroupsForUser(groupParams)
+      .promise();
+    const userGroup = groupData.Groups?.find(
+      (group) => group.GroupName === role,
+    );
+    if (!userGroup) {
+      sendResponse(res, 401, false, Message.UNAUTHORIZED);
+      return;
+    }
+    const userAttributes = userData.UserAttributes?.reduce((acc: any, attr) => {
+      acc[attr.Name] = attr.Value;
+      return acc;
+    }, {});
+
+    req.user = {
+      sub: userAttributes['sub'],
+      email: userAttributes['email'],
+      given_name: userAttributes['given_name'],
+      family_name: userAttributes['family_name'],
+    };
+
+    next();
+  } catch (error: any) {
+    console.error('Token verification failed:', error);
+
+    if (error.code === 'NotAuthorizedException') {
+      sendResponse(res, 401, false, Message.UNAUTHORIZED);
       return;
     }
 
-    req.user = user;
-    next();
-  });
+    sendResponse(res, 500, false, Message.COMMON_ERROR);
+  }
 };
+
+export const SuperAdminAuthMiddleware = (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+) => authenticateUser(req, res, next, AwsRole.SUPER_ADMIN);
+
+export const AdminAuthMiddleware = (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+) => authenticateUser(req, res, next, AwsRole.ADMIN);

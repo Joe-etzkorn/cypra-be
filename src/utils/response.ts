@@ -26,6 +26,7 @@ export const sendResponse = <T>(
   error?: any,
 ): Response<ApiResponse<T>> => {
   return res.status(statusCode).json({
+    status: statusCode,
     success,
     message,
     ...(data && { data }),

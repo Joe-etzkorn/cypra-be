@@ -12,4 +12,11 @@ export enum Message {
   CREATE_REQUEST_ACCOUNT_ERROR = 'Something went wrong. Please try again',
   CREATE_REQUEST_ACCOUNT_SUCCESS = 'Thanks for reaching out to us. We will get back to you soon',
   ACCOUNT_REQUEST_ALREADY_EXISTS = 'You have submitted with this email already. we will contact you soon',
+  GET_REQUESTED_ACCOUNTS_SUCCESS = 'Successfully retrieved requested accounts',
+  GET_REQUESTED_ACCOUNTS_ERROR = 'Error retrieving requested accounts',
+  REQUESTED_ACCOUNT_NOT_FOUND = 'Requested account not found',
+  GENERATE_TOKEN_SUCCESS = 'Token generated successfully',
+  GENERATE_TOKEN_ERROR = 'Error generating token',
+  INVALID_TOKEN = 'Invalid token',
+  VALIDATE_TOKEN_SUCCESS = 'Token validated successfully',
 }
