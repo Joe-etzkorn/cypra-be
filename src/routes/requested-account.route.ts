@@ -1,13 +1,17 @@
 import { Router } from 'express';
-import { createReqAccount, generateReqAccountToken, getReqAccounts, verifyReqAccountToken } from '../controllers/requested-account.controller';
 import { SuperAdminAuthMiddleware, AdminAuthMiddleware } from '../middleware/auth.middleware';
+import { RequestedAccountController } from '../controllers/requested-account.controller';
+import { RequestedAccountService } from '../services/requested-account.service';
 
 const router = Router();
 
-router.post('/', createReqAccount);
+const service = new RequestedAccountService();
+const controller = new RequestedAccountController(service);
 
-router.get('/', SuperAdminAuthMiddleware, getReqAccounts);
-router.post('/generate-token', SuperAdminAuthMiddleware, generateReqAccountToken);
-router.post('/verify-token', verifyReqAccountToken);
+// Bind the methods to maintain 'this' context
+router.post('/', controller.createReqAccount.bind(controller));
+router.get('/', SuperAdminAuthMiddleware, controller.getReqAccounts.bind(controller));
+router.post('/generate-token', SuperAdminAuthMiddleware, controller.generateReqAccountToken.bind(controller));
+router.post('/verify-token', controller.verifyRequestAccountToken.bind(controller));
 
 export default router;
