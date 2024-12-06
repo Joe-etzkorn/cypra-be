@@ -56,7 +56,7 @@ class UserController {
 
   update = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-      const userCognitoId = req.params.id;
+      const userCognitoId = req.params.userCognitoId;
       
       const { error } = userValidation.updateUser.validate(req.body);
       if (error) {
@@ -110,6 +110,37 @@ class UserController {
       );
     }
   };
+
+  getCompanyUsers = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      const userId = parseInt(req.query.userId as string);
+
+      const { error } = userValidation.getCompanyUsers.validate(req.query);
+      if (error) {
+        sendResponse(
+          res,
+          400,
+          false,
+          Message.VALIDATION_ERROR,
+          undefined,
+          error.details
+        );
+        return;
+      }
+
+      const users = await this.userService.getCompanyUsers(userId);
+      sendResponse(res, 200, true, Message.COMMON_SUCCESS, users);
+    } catch (error: any) {
+      sendResponse(
+        res,
+        500,
+        false,
+        Message.COMMON_ERROR,
+        undefined,
+        error
+      );
+    }
+  }
 }
 
 const userService = new UserService();

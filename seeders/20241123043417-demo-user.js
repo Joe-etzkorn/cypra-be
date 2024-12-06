@@ -30,7 +30,7 @@ module.exports = {
         companyName: 'G&G Landscaping',
         phone: null,
         roleId: 2,
-        parentId: 1,
+        parentId: null,
         clientId: 'dec26e30-bc1e-472d-bee5-69f8b4d064e6',
         clientSecret: 'I2zhF2sF4pvo50x9jBnTLUmB7U13Heve',
         userCognitoId: '717bb5e0-b041-706a-1a81-bd5cc69cb895',

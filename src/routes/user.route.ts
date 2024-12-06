@@ -5,7 +5,8 @@ import { AdminAuthMiddleware } from '../middleware/auth.middleware';
 const router = Router();
 
 router.post('/', userController.create);
-router.put('/:id', AdminAuthMiddleware, userController.update);
+router.put('/:userCognitoId', AdminAuthMiddleware, userController.update);
 router.post('/profile', AdminAuthMiddleware, userController.getProfile);
+router.get('/company-users', AdminAuthMiddleware, userController.getCompanyUsers);
 
 export default router;

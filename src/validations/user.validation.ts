@@ -15,7 +15,7 @@ export const userValidation = {
       }),
     firstName: Joi.string().required(),
     lastName: Joi.string().required(),
-    companyName: Joi.string().required(),
+    companyName: Joi.string().allow('').required(),
     clientId: Joi.string().optional(),
     clientSecret: Joi.string().optional(),
   }),
@@ -24,5 +24,12 @@ export const userValidation = {
     firstName: Joi.string().required(),
     lastName: Joi.string().required(),
     phone: Joi.string().allow(null, '').optional(),
+  }),
+
+  getCompanyUsers: Joi.object({
+    userId: Joi.number().required().messages({
+      'number.base': 'User ID must be a number',
+      'any.required': 'User ID is required'
+    })
   }),
 };

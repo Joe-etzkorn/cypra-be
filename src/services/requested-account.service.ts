@@ -120,7 +120,7 @@ export class RequestedAccountService {
           'hasUsedAspire',
           'createdAt',
           'token',
-          'hasExistedAccount',
+          'hasExistedAccount'
         ],
         order: [['createdAt', 'DESC']],
         limit,
@@ -163,6 +163,10 @@ export class RequestedAccountService {
   async verifyRequestAccountToken(
     token: string,
   ): Promise<RequestedAccount | null> {
+    if (!token) {
+      throw new Error(Message.INVALID_TOKEN);
+    }
+
     try {
       const requestedAccount = await RequestedAccount.findOne({
         where: { token },

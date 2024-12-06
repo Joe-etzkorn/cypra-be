@@ -22,4 +22,9 @@ export enum Message {
   VALIDATE_TOKEN_SUCCESS = 'Token validated successfully',
   UPDATE_USER_SUCCESS = 'User updated successfully',
   UPDATE_USER_ERROR = 'Error updating user',
+  MUST_BE_ADMIN = 'You must be an admin to perform this action',
+  USER_ID_REQUIRED = 'User ID is required',
+  EMAIL_ALREADY_INVITED = 'Email already invited',
+  CREATE_INVITATION_ERROR = 'Error creating invitation',
+  CREATE_INVITATION_SUCCESS = 'Invitation sent successfully',
 }

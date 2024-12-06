@@ -6,11 +6,11 @@ import { AwsRole } from '../enums/role.enum';
 
 const cognito = new AWS.CognitoIdentityServiceProvider({
   region: process.env.AWS_REGION,
-  credentials: new AWS.Credentials(
-    process.env.AWS_ACCESS_KEY_ID!,
-    process.env.AWS_SECRET_ACCESS_KEY!,
-    process.env.AWS_SESSION_TOKEN,
-  ),
+  // credentials: new AWS.Credentials(
+  //   process.env.AWS_ACCESS_KEY_ID!,
+  //   process.env.AWS_SECRET_ACCESS_KEY!,
+  //   process.env.AWS_SESSION_TOKEN,
+  // ),
 });
 
 interface AuthenticatedRequest extends Request {
@@ -21,7 +21,7 @@ const authenticateUser = async (
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction,
-  role: AwsRole,
+  role: AwsRole[],
 ): Promise<void> => {
   const authHeader = req.headers['authorization'];
   const token = authHeader?.split(' ')[1];
@@ -46,7 +46,7 @@ const authenticateUser = async (
       .adminListGroupsForUser(groupParams)
       .promise();
     const userGroup = groupData.Groups?.find(
-      (group) => group.GroupName === role,
+      (group) => role.includes(group.GroupName as AwsRole),
     );
     if (!userGroup) {
       sendResponse(res, 401, false, Message.UNAUTHORIZED);
@@ -81,10 +81,10 @@ export const SuperAdminAuthMiddleware = (
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction,
-) => authenticateUser(req, res, next, AwsRole.SUPER_ADMIN);
+) => authenticateUser(req, res, next, [AwsRole.SUPER_ADMIN]);
 
 export const AdminAuthMiddleware = (
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction,
-) => authenticateUser(req, res, next, AwsRole.ADMIN);
+) => authenticateUser(req, res, next, [AwsRole.ADMIN, AwsRole.USER]);

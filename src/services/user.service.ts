@@ -11,11 +11,11 @@ import { CreateUserInput, UpdateUserInput } from '../interfaces/user.interface';
 
 const cognito = new AWS.CognitoIdentityServiceProvider({
   region: process.env.AWS_REGION,
-  credentials: new AWS.Credentials(
-    process.env.AWS_ACCESS_KEY_ID!,
-    process.env.AWS_SECRET_ACCESS_KEY!,
-    process.env.AWS_SESSION_TOKEN,
-  ),
+  // credentials: new AWS.Credentials(
+  //   process.env.AWS_ACCESS_KEY_ID!,
+  //   process.env.AWS_SECRET_ACCESS_KEY!,
+  //   process.env.AWS_SESSION_TOKEN,
+  // ),
 });
 
 export class UserService {
@@ -127,6 +127,17 @@ export class UserService {
   }
 
   private async createUserRecord(userData: CreateUserInput, hashedPassword: string, role: Role, cognitoResponse: AWS.CognitoIdentityServiceProvider.AdminCreateUserResponse, userInvitation: UserInvitation | null): Promise<User> {
+    let parentId = null;
+    if (userInvitation) {
+      // get the user's parent id from the invitation
+      const companyAdmin = await User.findOne({
+        where: {
+          id: userInvitation.invitedUserId,
+          isAdministrator: 1 // the one who invited user must be admin
+        }
+      })
+      parentId = companyAdmin?.parentId || userInvitation.invitedUserId
+    }
     return User.create({
       email: userData.email,
       password: hashedPassword,
@@ -136,7 +147,7 @@ export class UserService {
       clientId: userData.clientId,
       clientSecret: userData.clientSecret,
       roleId: role,
-      parentId: userInvitation ? userInvitation.invitedUserId : null,
+      parentId: userInvitation ? parentId : null,
       isAdministrator: role === Role.ADMIN ? 1 : 0,
       userCognitoId: cognitoResponse.User?.Username,
     });
@@ -187,6 +198,37 @@ export class UserService {
       return this.omitPassword(user);
     } catch (error) {
       console.error('Error fetching user:', error);
+      throw error;
+    }
+  }
+  
+  async getCompanyUsers(userId: number): Promise<User[] | null> {
+    try {
+      if (!userId || isNaN(userId)) {
+        throw new Error(Message.USER_ID_REQUIRED);
+      }
+
+      const currentUser = await User.findByPk(userId);
+      
+      if (!currentUser) {
+        throw new Error(Message.USER_NOT_FOUND);
+      }
+
+      const whereCondition = {
+        [Op.or]: [
+          { id: userId },
+          {
+            parentId: currentUser.roleId
+          }
+        ]
+      };
+
+      return User.findAll({
+        where: whereCondition,
+        attributes: { exclude: ['password'] }
+      });
+    } catch (error) {
+      console.error('Error fetching users:', error);
       throw error;
     }
   }
