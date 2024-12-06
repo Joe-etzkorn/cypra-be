@@ -7,6 +7,7 @@ import User from '../models/user.model';
 import UserInvitation from '../models/userInvitation.model';
 import sendAspireRequest from '../utils/aspire-request';
 import AWS from 'aws-sdk';
+import { CreateUserInput, UpdateUserInput } from '../interfaces/user.interface';
 
 const cognito = new AWS.CognitoIdentityServiceProvider({
   region: process.env.AWS_REGION,
@@ -16,16 +17,6 @@ const cognito = new AWS.CognitoIdentityServiceProvider({
     process.env.AWS_SESSION_TOKEN,
   ),
 });
-
-interface CreateUserInput {
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  companyName: string;
-  clientId: string;
-  clientSecret: string;
-}
 
 export class UserService {
   async createUser(userData: CreateUserInput): Promise<User | null> {
@@ -154,5 +145,49 @@ export class UserService {
   private omitPassword(user: User): User {
     const { password, ...userWithoutPassword } = user.get({ plain: true });
     return userWithoutPassword as User;
+  }
+
+  async updateUser(userCognitoId: string, userData: UpdateUserInput): Promise<User | null> {
+    try {
+      const user = await User.findOne({ where: { userCognitoId } });
+      
+      if (!user) {
+        throw new Error(Message.USER_NOT_FOUND);
+      }
+
+      await user.update({
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        phone: userData.phone,
+      });
+
+      await cognito.adminUpdateUserAttributes({
+        UserPoolId: process.env.COGNITO_USER_POOL_ID!,
+        Username: user.email,
+        UserAttributes: [
+          { Name: 'given_name', Value: userData.firstName },
+          { Name: 'family_name', Value: userData.lastName },
+          ...(userData.phone ? [{ Name: 'phone_number', Value: userData.phone }] : []),
+        ],
+      }).promise();
+
+      return this.omitPassword(user);
+    } catch (error) {
+      console.error('Error updating user:', error);
+      throw error;
+    }
+  }
+
+  async getProfile(email: string): Promise<User | null> {
+    try {
+      const user = await User.findOne({ where: { email } });
+      if (!user) {
+        throw new Error(Message.USER_NOT_FOUND);
+      }
+      return this.omitPassword(user);
+    } catch (error) {
+      console.error('Error fetching user:', error);
+      throw error;
+    }
   }
 }

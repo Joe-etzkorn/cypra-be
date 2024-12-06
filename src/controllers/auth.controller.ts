@@ -5,10 +5,10 @@ import { Message } from '../enums/message.enum';
 import { AuthService } from '../services/auth.service';
 import { authValidation } from '../validations/auth.validate';
 
-export class AuthController {
+class AuthController {
   constructor(private authService: AuthService) {}
 
-  async login(req: Request, res: Response): Promise<void> {
+  login = async (req: Request, res: Response): Promise<void> => {
     const { email, password, isSuperAdmin = false } = req.body;
 
     const { error } = authValidation.login.validate({
@@ -55,3 +55,6 @@ export class AuthController {
     }
   }
 }
+
+const authService = new AuthService();
+export const authController = new AuthController(authService);

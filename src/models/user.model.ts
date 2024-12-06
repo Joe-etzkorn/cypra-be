@@ -16,6 +16,7 @@ class User extends Model {
   public userCognitoId!: string;
   public createdAt!: Date;
   public updatedAt!: Date;
+  public phone?: string;
 }
 
 User.init(
@@ -45,6 +46,11 @@ User.init(
       type: DataTypes.STRING,
       allowNull: false,
       field: 'companyName',
+    },
+    phone: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      field: 'phone',
     },
     clientId: {
       type: DataTypes.STRING,

@@ -8,10 +8,10 @@ import { DEFAULT_LIMIT } from '../utils/common';
 import { DEFAULT_PAGE } from '../utils/common';
 import { requestAccountValidation } from '../validations/request-account.validation';
 
-export class RequestedAccountController {
+class RequestedAccountController {
   constructor(private requestedAccountService: RequestedAccountService) {}
 
-  async createReqAccount(req: Request, res: Response): Promise<void> {
+  createReqAccount = async (req: Request, res: Response): Promise<void> => {
     try {
       const { error } = requestAccountValidation.createRequestAccount.validate(
         req.body,
@@ -56,7 +56,7 @@ export class RequestedAccountController {
     }
   }
 
-  async getReqAccounts(req: Request, res: Response): Promise<void> {
+  getReqAccounts = async (req: Request, res: Response): Promise<void> => {
     try {
       const { error } = requestAccountValidation.getRequestedAccount.validate(
         req.query,
@@ -109,7 +109,7 @@ export class RequestedAccountController {
     }
   }
 
-  async generateReqAccountToken(req: Request, res: Response): Promise<void> {
+  generateReqAccountToken = async (req: Request, res: Response): Promise<void> => {
     try {
       const { error } = requestAccountValidation.generateToken.validate(
         req.body,
@@ -148,7 +148,7 @@ export class RequestedAccountController {
     }
   }
 
-  async verifyRequestAccountToken(req: Request, res: Response): Promise<void> {
+  verifyRequestAccountToken = async (req: Request, res: Response): Promise<void> => {
     try {
       const { error } = requestAccountValidation.verifyToken.validate(req.body);
       if (error) {
@@ -183,3 +183,8 @@ export class RequestedAccountController {
     }
   }
 }
+
+const requestedAccountService = new RequestedAccountService();
+export const requestedAccountController = new RequestedAccountController(
+  requestedAccountService,
+);

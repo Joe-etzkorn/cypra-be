@@ -1,5 +1,6 @@
 export enum Message {
   COMMON_ERROR = 'Something went wrong. Please try again',
+  COMMON_SUCCESS = 'Success',
   UNAUTHORIZED = 'Unauthorized',
   EMAIL_ALREADY_EXISTS = 'Email already exists',
   CREDENTIALS_REQUIRED = 'Client credentials are required',
@@ -19,4 +20,6 @@ export enum Message {
   GENERATE_TOKEN_ERROR = 'Error generating token',
   INVALID_TOKEN = 'Invalid token',
   VALIDATE_TOKEN_SUCCESS = 'Token validated successfully',
+  UPDATE_USER_SUCCESS = 'User updated successfully',
+  UPDATE_USER_ERROR = 'Error updating user',
 }

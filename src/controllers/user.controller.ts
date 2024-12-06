@@ -10,7 +10,7 @@ interface AuthenticatedRequest extends Request {
   user?: JwtPayload;
 }
 
-export class UserController {
+class UserController {
   constructor(private userService: UserService) {}
 
   create = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
@@ -53,4 +53,64 @@ export class UserController {
       );
     }
   };
+
+  update = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      const userCognitoId = req.params.id;
+      
+      const { error } = userValidation.updateUser.validate(req.body);
+      if (error) {
+        sendResponse(
+          res,
+          400,
+          false,
+          Message.VALIDATION_ERROR,
+          undefined,
+          error.details,
+        );
+        return;
+      }
+
+      const user = await this.userService.updateUser(userCognitoId, req.body);
+      sendResponse(res, 200, true, Message.UPDATE_USER_SUCCESS, user);
+    } catch (error: any) {
+      if (error.message === Message.USER_NOT_FOUND) {
+        sendResponse(res, 404, false, error.message);
+        return;
+      }
+      sendResponse(
+        res,
+        500,
+        false,
+        Message.UPDATE_USER_ERROR,
+        undefined,
+        error,
+      );
+    }
+  };
+
+  getProfile = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      const { email } = req.body;
+
+      const user = await this.userService.getProfile(email);
+      sendResponse(res, 200, true, Message.COMMON_SUCCESS, user);
+    } catch (error: any) {
+      if (error.message === Message.USER_NOT_FOUND) {
+        sendResponse(res, 404, false, error.message);
+        return;
+      }
+      sendResponse(
+        res,
+        500,
+        false,
+        Message.COMMON_ERROR,
+        undefined,
+        error,
+      );
+    }
+  };
 }
+
+const userService = new UserService();
+export const userController = new UserController(userService);

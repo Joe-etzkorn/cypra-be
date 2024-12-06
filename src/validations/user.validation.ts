@@ -19,4 +19,10 @@ export const userValidation = {
     clientId: Joi.string().optional(),
     clientSecret: Joi.string().optional(),
   }),
+
+  updateUser: Joi.object({
+    firstName: Joi.string().required(),
+    lastName: Joi.string().required(),
+    phone: Joi.string().allow(null, '').optional(),
+  }),
 };
