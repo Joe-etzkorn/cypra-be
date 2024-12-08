@@ -141,6 +141,86 @@ class UserController {
       );
     }
   }
+
+  delete = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+
+      const userCognitoId = req.body.userCognitoId;
+      const adminId = parseInt(req.body.adminId);
+      
+      await this.userService.deleteUser(userCognitoId, adminId);
+      sendResponse(res, 200, true, Message.DELETE_USER_SUCCESS);
+    } catch (error: any) {
+      if (error.message === Message.USER_NOT_FOUND) {
+        sendResponse(res, 404, false, error.message);
+        return;
+      }
+      if (error.message === Message.PERMISSION_DENIED) {
+        sendResponse(res, 403, false, error.message);
+        return;
+      }
+      if (error.message === Message.PERMISSION_DENIED) {
+        sendResponse(res, 400, false, error.message);
+        return;
+      }
+      if (error.message === Message.PERMISSION_DENIED) {
+        sendResponse(res, 400, false, error.message);
+        return;
+      }
+      sendResponse(
+        res,
+        500,
+        false,
+        Message.DELETE_USER_ERROR,
+        undefined,
+        error,
+      );
+    }
+  };
+
+  toggleAdminPrivilege = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      const { userId, adminId, isAdministrator } = req.body;
+  
+      const { error } = userValidation.toggleAdminPrivilege.validate({
+        userId,
+        adminId,
+        isAdministrator
+      });
+  
+      if (error) {
+        sendResponse(
+          res,
+          400,
+          false,
+          Message.VALIDATION_ERROR,
+          undefined,
+          error.details
+        );
+        return;
+      }
+  
+      const updatedUser = await this.userService.toggleAdminPrivilege(userId, adminId, isAdministrator);
+      sendResponse(res, 200, true, Message.UPDATE_USER_SUCCESS, updatedUser);
+    } catch (error: any) {
+      if (error.message === Message.USER_NOT_FOUND) {
+        sendResponse(res, 404, false, error.message);
+        return;
+      }
+      if (error.message === Message.PERMISSION_DENIED) {
+        sendResponse(res, 403, false, error.message);
+        return;
+      }
+      sendResponse(
+        res,
+        500,
+        false,
+        Message.UPDATE_USER_ERROR,
+        undefined,
+        error
+      );
+    }
+  };
 }
 
 const userService = new UserService();

@@ -32,4 +32,10 @@ export const userValidation = {
       'any.required': 'User ID is required'
     })
   }),
+
+  toggleAdminPrivilege: Joi.object({
+    userId: Joi.number().required(),
+    adminId: Joi.number().required(),
+    isAdministrator: Joi.number().valid(0, 1).required()
+  })
 };

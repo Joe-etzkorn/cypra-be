@@ -3,6 +3,8 @@ import { Message } from '../enums/message.enum';
 import UserInvitation from '../models/userInvitation.model';
 import User from '../models/user.model';
 import { Role } from '../enums/role.enum';
+import { inviteUserTemplate } from '../templates/invite-user';
+import { EmailService } from './email.service';
 
 interface InviteUserInput {
   firstName: string;
@@ -11,6 +13,12 @@ interface InviteUserInput {
 }
 
 export class UserInviteService {
+  private emailService: EmailService;
+
+  constructor() {
+    this.emailService = new EmailService();
+  }
+
   async inviteUser(data: InviteUserInput, invitedUserId: number): Promise<UserInvitation> {
     try {
       const companyAdmin = await User.findOne({
@@ -44,6 +52,21 @@ export class UserInviteService {
         email: data.email,
         invitedUserId,
         token
+      });
+
+
+      const inviteLink = `${process.env.FRONTEND_URL}/user-invited?token=${token}`;
+      const emailBody = inviteUserTemplate(
+        data.firstName,
+        inviteLink,
+        companyAdmin.companyName,
+      );
+
+      await this.emailService.sendEmail({
+        from: process.env.SMTP_USER!,
+        to: data.email,
+        subject: 'Invitation to join platform',
+        body: emailBody,
       });
 
       return invitation;

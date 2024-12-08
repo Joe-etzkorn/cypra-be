@@ -27,4 +27,12 @@ export enum Message {
   EMAIL_ALREADY_INVITED = 'Email already invited',
   CREATE_INVITATION_ERROR = 'Error creating invitation',
   CREATE_INVITATION_SUCCESS = 'Invitation sent successfully',
+  DELETE_USER_SUCCESS = 'User deleted successfully',
+  DELETE_USER_ERROR = 'Error deleting user',
+  INVALID_ADMIN_STATUS = 'Invalid admin status',
+  EMAIL_REQUIRED = 'Email is required',
+  EMAIL_NOT_FOUND = 'Email not found',
+  RESET_PASSWORD_EMAIL_SENT = 'Reset password email sent successfully',
+  RESET_PASSWORD_ERROR = 'Error sending reset password email',
+  RESET_PASSWORD_SUCCESS = 'Password reset successfully',
 }

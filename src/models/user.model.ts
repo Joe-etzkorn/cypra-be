@@ -12,7 +12,7 @@ class User extends Model {
   public parentId!: number;
   public clientId?: string;
   public clientSecret?: string;
-  public isAdministrator!: boolean;
+  public isAdministrator!: number;
   public userCognitoId!: string;
   public createdAt!: Date;
   public updatedAt!: Date;

@@ -25,11 +25,7 @@ class UserInviteController {
   
       sendResponse(res, 201, true, Message.CREATE_INVITATION_SUCCESS, invitation);
     } catch (error: any) {
-      if (error.message === Message.EMAIL_ALREADY_EXISTS) {
-        sendResponse(res, 400, false, error.message);
-        return;
-      }
-      if (error.message === Message.EMAIL_ALREADY_INVITED) {
+      if ([Message.MUST_BE_ADMIN, Message.EMAIL_ALREADY_EXISTS, Message.EMAIL_ALREADY_INVITED].includes(error.message)) {
         sendResponse(res, 400, false, error.message);
         return;
       }

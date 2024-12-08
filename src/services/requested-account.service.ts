@@ -3,6 +3,9 @@ import RequestedAccount from '../models/requestedAccount.model';
 import User from '../models/user.model';
 import { DEFAULT_LIMIT, DEFAULT_PAGE, generateUniqueToken } from '../utils/common';
 import { Op } from 'sequelize';
+import { EmailService } from './email.service';
+import { getStartedTemplate } from '../templates/get-started';
+import { Role } from '../enums/role.enum';
 
 interface RequestedAccountsResponse {
   requestedAccounts: RequestedAccount[];
@@ -17,6 +20,12 @@ interface RequestAccountFilters {
   searchValue?: string;
 }
 export class RequestedAccountService {
+  private emailService: EmailService;
+
+  constructor() {
+    this.emailService = new EmailService();
+  }
+
   async createRequestAccount(data: {
     name: string;
     companyName: string;
@@ -47,6 +56,27 @@ export class RequestedAccountService {
         userId: existingAccount ? existingUser?.id : null,
         token: null,
       });
+
+      const emailBody = getStartedTemplate({
+        name: data.name,
+        email: data.email,
+        company: data.companyName,
+        phone: data.phone,
+        comment: data.comments,
+      });
+
+      const superAdminUser = await User.findOne({
+        where: { roleId: Role.SUPER_ADMIN },
+      });
+
+      if (superAdminUser && data.hasUsedAspire) {
+        await this.emailService.sendEmail({
+          from: process.env.SMTP_USER!,
+          to: superAdminUser.email!,
+          subject: 'New account request',
+          body: emailBody,
+        });
+      }
 
       return requestedAccount;
     } catch (error: any) {

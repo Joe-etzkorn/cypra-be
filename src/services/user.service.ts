@@ -232,4 +232,78 @@ export class UserService {
       throw error;
     }
   }
+
+  async deleteUser(userCognitoId: string, adminId: number): Promise<boolean> {
+    try {
+      const user = await User.findOne({
+        where: { userCognitoId, isAdministrator: 1 },
+      });
+
+      if (!user) {
+        throw new Error(Message.USER_NOT_FOUND);
+      }
+
+      const admin = await User.findByPk(adminId);
+
+      if (!admin || admin.roleId !== Role.ADMIN) {
+        throw new Error(Message.PERMISSION_DENIED);
+      }
+
+      if (user.id === admin.id) {
+        throw new Error(Message.PERMISSION_DENIED);
+      }
+
+      if (user.parentId !== admin.roleId) {
+        throw new Error(Message.PERMISSION_DENIED);
+      }
+
+      if (user.roleId !== Role.USER) {
+        throw new Error(Message.PERMISSION_DENIED);
+      }
+
+      await cognito.adminDeleteUser({
+        UserPoolId: process.env.COGNITO_USER_POOL_ID!,
+        Username: user.email,
+      }).promise();
+
+      await user.destroy();
+
+      return true;
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      throw error;
+    }
+  }
+
+  async toggleAdminPrivilege(userId: number, adminId: number, isAdministrator: number): Promise<User | null> {
+    try {
+      const user = await User.findByPk(userId);
+      if (!user) {
+        throw new Error(Message.USER_NOT_FOUND);
+      }
+
+      const admin = await User.findByPk(adminId);
+      // Only admin can toggle admin privilege
+      if (!admin || admin.roleId !== Role.ADMIN) {
+        throw new Error(Message.PERMISSION_DENIED);
+      }
+
+      // Only user created by the admin can be toggled to admin
+      if (user.roleId !== Role.USER && user.parentId !== admin.roleId) {
+        throw new Error(Message.PERMISSION_DENIED);
+      }
+
+      if (isAdministrator !== 0 && isAdministrator !== 1) {
+        throw new Error(Message.INVALID_ADMIN_STATUS);
+      }
+
+      const newAdminStatus = isAdministrator;
+      await user.update({ isAdministrator: newAdminStatus });
+
+      return this.omitPassword(user);
+    } catch (error) {
+      console.error('Error toggling admin privilege:', error);
+      throw error;
+    }
+  }
 }
