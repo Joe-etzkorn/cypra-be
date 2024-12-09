@@ -65,17 +65,19 @@ export class RequestedAccountService {
         comment: data.comments,
       });
 
-      const superAdminUser = await User.findOne({
+      const superAdminUsers = await User.findAll({
         where: { roleId: Role.SUPER_ADMIN },
       });
-
-      if (superAdminUser && data.hasUsedAspire) {
-        await this.emailService.sendEmail({
-          from: process.env.SMTP_MAIL_FROM!,
-          to: superAdminUser.email!,
-          subject: 'New account request',
-          body: emailBody,
-        });
+      
+      for (const superAdminUser of superAdminUsers) {
+        if (superAdminUser && data.hasUsedAspire) {
+          await this.emailService.sendEmail({
+            from: process.env.SMTP_MAIL_FROM!,
+            to: superAdminUser.email!,
+            subject: 'New account request',
+            body: emailBody,
+          });
+        }
       }
 
       return requestedAccount;
