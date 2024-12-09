@@ -63,7 +63,7 @@ export class UserInviteService {
       );
 
       await this.emailService.sendEmail({
-        from: process.env.SMTP_USER!,
+        from: process.env.SMTP_MAIL_FROM!,
         to: data.email,
         subject: 'Invitation to join platform',
         body: emailBody,

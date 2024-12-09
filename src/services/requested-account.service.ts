@@ -71,7 +71,7 @@ export class RequestedAccountService {
 
       if (superAdminUser && data.hasUsedAspire) {
         await this.emailService.sendEmail({
-          from: process.env.SMTP_USER!,
+          from: process.env.SMTP_MAIL_FROM!,
           to: superAdminUser.email!,
           subject: 'New account request',
           body: emailBody,
