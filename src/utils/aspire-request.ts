@@ -10,12 +10,19 @@ const sendAspireRequest = async (
   method: HttpMethod,
   endpoint: string,
   body: RequestBody | null = null,
+  token?: string,
 ) => {
   try {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const options: RequestInit = {
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       method,
     };
 

@@ -1,5 +1,5 @@
 import { Message } from '../enums/message.enum';
-import RequestedAccount from '../models/requestedAccount.model';
+import RequestedAccount from '../models/requested-account.model';
 import User from '../models/user.model';
 import { DEFAULT_LIMIT, DEFAULT_PAGE, generateUniqueToken } from '../utils/common';
 import { Op } from 'sequelize';

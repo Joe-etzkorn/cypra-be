@@ -1,6 +1,6 @@
 import { generateUniqueToken } from '../utils/common';
 import { Message } from '../enums/message.enum';
-import UserInvitation from '../models/userInvitation.model';
+import UserInvitation from '../models/user-invitation.model';
 import User from '../models/user.model';
 import { Role } from '../enums/role.enum';
 import { inviteUserTemplate } from '../templates/invite-user';

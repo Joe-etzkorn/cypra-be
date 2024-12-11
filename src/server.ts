@@ -2,6 +2,10 @@ import app from './app';
 import dotenv from 'dotenv';
 import { Pool } from 'pg';
 import { setupAssociations } from './models/associations';
+import pullDataFromAspire from './crons/pull-data-from-aspire';
+// import './crons/index'
+
+// pullDataFromAspire();
 
 dotenv.config();
 

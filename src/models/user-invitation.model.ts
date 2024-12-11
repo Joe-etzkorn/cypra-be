@@ -2,68 +2,54 @@ import { DataTypes, Model } from 'sequelize';
 import sequelize from '../utils/db';
 import User from './user.model';
 
-class RequestedAccount extends Model {
+class UserInvitation extends Model {
   public id!: number;
-  public name!: string;
   public email!: string;
-  public phone?: string;
-  public companyName?: string;
-  public comments?: string;
-  public hasUsedAspire!: boolean;
-  public userId?: string;
-  public hasExistedAccount!: boolean;
-  public token?: string;
+  public firstName!: string;
+  public lastName!: string;
+  public invitedUserId!: number;
+  public token!: string;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
+  public user?: User;
 }
 
-RequestedAccount.init(
+// Initialize the model
+UserInvitation.init(
   {
     id: {
       type: DataTypes.INTEGER,
-      primaryKey: true,
       autoIncrement: true,
-      allowNull: false,
-    },
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
+      primaryKey: true,
     },
     email: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true,
-    },
-    phone: {
-      type: DataTypes.STRING,
-    },
-    companyName: {
-      type: DataTypes.STRING,
-    },
-    comments: {
-      type: DataTypes.TEXT,
-    },
-    hasUsedAspire: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: false,
-    },
-    userId: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: User,
-        key: 'id',
+      validate: {
+        isEmail: true,
       },
     },
-    hasExistedAccount: {
-      type: DataTypes.BOOLEAN,
+    firstName: {
+      type: DataTypes.STRING,
       allowNull: false,
-      defaultValue: false,
+    },
+    lastName: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    invitedUserId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'users',
+        key: 'id',
+      },
+      onUpdate: 'CASCADE',
+      onDelete: 'CASCADE',
     },
     token: {
       type: DataTypes.STRING,
-      allowNull: true,
+      allowNull: false,
       unique: true,
     },
     createdAt: {
@@ -79,9 +65,10 @@ RequestedAccount.init(
   },
   {
     sequelize,
-    tableName: 'requested_accounts',
+    tableName: 'user_invitations',
+    modelName: 'UserInvitation',
     timestamps: true,
   },
 );
 
-export default RequestedAccount;
+export default UserInvitation;

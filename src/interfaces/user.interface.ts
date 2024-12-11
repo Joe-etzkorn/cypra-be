@@ -13,3 +13,10 @@ export interface UpdateUserInput {
   lastName: string;
   phone?: string;
 }
+
+export interface CognitoUser {
+  sub: string;
+  email: string;
+  given_name: string;
+  family_name: string;
+}

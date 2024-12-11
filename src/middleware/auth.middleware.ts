@@ -3,6 +3,7 @@ import AWS from 'aws-sdk';
 import { sendResponse } from '../utils/response';
 import { Message } from '../enums/message.enum';
 import { AwsRole } from '../enums/role.enum';
+import { CognitoUser } from '../interfaces/user.interface';
 
 const cognito = new AWS.CognitoIdentityServiceProvider({
   region: process.env.AWS_REGION,
@@ -62,7 +63,7 @@ const authenticateUser = async (
       email: userAttributes['email'],
       given_name: userAttributes['given_name'],
       family_name: userAttributes['family_name'],
-    };
+    } as CognitoUser;
 
     next();
   } catch (error: any) {

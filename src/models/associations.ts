@@ -1,7 +1,7 @@
 import User from './user.model';
 import Role from './role.model';
-import RequestedAccount from './requestedAccount.model';
-import UserInvitation from './userInvitation.model';
+import RequestedAccount from './requested-account.model';
+import UserInvitation from './user-invitation.model';
 
 export const setupAssociations = (): void => {
   process.nextTick(() => {

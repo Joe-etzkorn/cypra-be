@@ -152,7 +152,7 @@ export class AuthService {
       );
 
       await this.emailService.sendEmail({
-        from: 'Team <hello@demomailtrap.com>',
+        from: process.env.SMTP_MAIL_FROM!,
         to: email,
         subject: 'Password Reset Request',
         body: emailBody,
