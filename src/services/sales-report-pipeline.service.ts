@@ -1,5 +1,8 @@
-import { CognitoUser } from '../interfaces/user.interface';
 import Opportunity from '../models/opportunity.model';
+import { Op } from 'sequelize';
+import { DEFAULT_LIMIT } from '../utils/common';
+import { DEFAULT_PAGE } from '../utils/common';
+import { CognitoUser } from '../interfaces/user.interface';
 import User from '../models/user.model';
 
 type Summary = {
@@ -17,61 +20,153 @@ type DivisionSummary = {
 };
 
 export class SalesReportPipelineService {
-  async getReport(cognitoUser: CognitoUser, _filters: any): Promise<any> {
+  async getReport(cognitoUser: CognitoUser, _filter: any): Promise<any> {
     try {
-      const user = await User.findOne({
+      const opportunities = await Opportunity.findAll({
         where: {
-          userCognitoId: cognitoUser.sub,
+          companyId: cognitoUser.dbUser.id,
         },
       });
+      const grouped = this.groupOpportunities(opportunities);
 
-      if (!user) {
-        return null;
-      }
-      return await this.calculate(user.id);
+      const [mostDivision, averageSalesCycle] = await Promise.all([
+        this.mostDivision(grouped.bidding.concat(grouped.delivered)),
+        this.calculateCycleFromDeliveryToApproval(grouped.delivered),
+      ]);
+
+      return {
+        common: {
+          count: grouped.bidding.length + grouped.delivered.length,
+          total:
+            this.calculateTotal(grouped.bidding) +
+            this.calculateTotal(grouped.delivered),
+        },
+        bidding: { count: grouped.bidding.length },
+        delivered: { count: grouped.delivered.length },
+        mostDivision,
+        averageSalesCycle: { count: averageSalesCycle },
+      };
     } catch (error) {
       console.error('Error getting sales dashboard:', error);
       throw error;
     }
   }
 
-  private async calculate(userId: number) {
-    const opportunities = await Opportunity.findAll({
-      where: {
-        companyId: userId,
-      },
-    });
+  async getBiddingDeliveryTable(
+    cognitoUser: CognitoUser,
+    page: number = DEFAULT_PAGE,
+    limit: number = DEFAULT_LIMIT,
+    type: 'bidding' | 'delivered',
+  ): Promise<any> {
+    try {
+      const opportunities = await Opportunity.findAll({
+        where: {
+          companyId: cognitoUser.dbUser.id,
+          opportunityStatusName: type === 'bidding' ? 'Bidding' : 'Delivered',
+        },
+        limit,
+        offset: (page - 1) * limit,
+      });
 
-    const grouped = this.groupOpportunities(opportunities);
-    const [
-      mostDivision,
-      averageSalesCycle,
-      biddingTable,
-      deliveredTable,
-      wonLost,
-    ] = await Promise.all([
-      this.mostDivision(grouped.bidding.concat(grouped.delivered)),
-      this.calculateCycleFromDeliveryToApproval(grouped.delivered),
-      this.getSummaryByBiddingOrDelivery(grouped.bidding),
-      this.getSummaryByBiddingOrDelivery(grouped.delivered),
-      this.getSummaryWonLost(grouped.wonLost),
-    ]);
+      const total = await Opportunity.count({
+        where: {
+          opportunityStatusName: type === 'bidding' ? 'Bidding' : 'Delivered',
+        },
+      });
 
-    return {
-      common: {
-        count: grouped.bidding.length + grouped.delivered.length,
-        total:
-          this.calculateTotal(grouped.bidding) +
-          this.calculateTotal(grouped.delivered),
-      },
-      bidding: { count: grouped.bidding.length },
-      delivered: { count: grouped.delivered.length },
-      mostDivision,
-      averageSalesCycle: { count: averageSalesCycle },
-      biddingTable,
-      deliveredTable,
-      wonLost,
-    };
+      const data = opportunities.map((o) => ({
+        key: o.opportunityId,
+        property: o.propertyName || 'Unknown',
+        division: o.divisionName || 'Unknown',
+        name: o.salesRepContactName || 'Unknown',
+        estHrs: o.estimatedLaborHours || 0,
+        estProfit: o.estimatedNetProfitPercent || 0,
+      }));
+
+      return {
+        table: data,
+        total,
+        totalPages: Math.ceil(total / limit),
+        currentPage: page,
+      };
+    } catch (error) {
+      console.error('Error getting table data:', error);
+      throw error;
+    }
+  }
+
+  async getWonLostSummary(
+    cognitoUser: CognitoUser,
+    page: number = DEFAULT_PAGE,
+    limit: number = DEFAULT_LIMIT,
+  ): Promise<any> {
+    try {
+      const [wonTotal, lostTotal, total] = await Promise.all([
+        Opportunity.count({
+          where: {
+            companyId: cognitoUser.dbUser.id,
+            opportunityStatusName: 'Won',
+          },
+        }),
+        Opportunity.count({
+          where: {
+            companyId: cognitoUser.dbUser.id,
+            opportunityStatusName: 'Lost',
+          },
+        }),
+        Opportunity.count({
+          where: {
+            companyId: cognitoUser.dbUser.id,
+          }
+        }),
+      ]);
+
+      const opportunities = await Opportunity.findAll({
+        where: {
+          companyId: cognitoUser.dbUser.id,
+          opportunityStatusName: {
+            [Op.in]: ['Won', 'Lost'],
+          },
+        },
+        limit,
+        offset: (page - 1) * limit,
+      });
+
+      let wonCount = 0;
+      let lostCount = 0;
+
+      const summary = opportunities.map((o) => {
+        const isWon = !!o.wonDate;
+        if (isWon) wonCount++;
+        else lostCount++;
+
+        return {
+          key: o.opportunityId,
+          status: isWon ? 'Won' : 'Lost',
+          date: o.wonDate || o.lostDate || 'Unknown',
+          property: o.propertyName || 'Unknown',
+          division: o.divisionName || 'Unknown',
+          name: o.salesRepContactName || 'Unknown',
+          estHrs: o.estimatedLaborHours || 0,
+          estProfit: o.estimatedNetProfitPercent || 0,
+        };
+      });
+
+      const totalAll = wonTotal + lostTotal;
+      const wonPercentage = total > 0 ? (wonTotal / total) * 100 : 0;
+      const lostPercentage = total > 0 ? (lostTotal / total) * 100 : 0;
+
+      return {
+        table: summary,
+        totalPages: Math.ceil(total / limit),
+        currentPage: page,
+        chart: [wonPercentage, lostPercentage],
+        total: totalAll,
+      };
+    } catch (error) {
+      console.error('Error getting won/lost summary:', error);
+      throw error;
+    }
   }
 
   private groupOpportunities(opportunities: Opportunity[]) {
@@ -138,50 +233,5 @@ export class SalesReportPipelineService {
 
     const totalCycleDays = cycleDays.reduce((sum, days) => sum + days, 0);
     return totalCycleDays / cycleDays.length;
-  }
-
-  private async getSummaryByBiddingOrDelivery(
-    opportunities: Opportunity[],
-  ): Promise<Summary[]> {
-    return opportunities.map((o) => ({
-      key: o.opportunityId,
-      property: o.propertyName || 'Unknown',
-      division: o.divisionName || 'Unknown',
-      name: o.salesRepContactName || 'Unknown',
-      estHrs: o.estimatedLaborHours || 0,
-      estProfit: o.estimatedNetProfitPercent || 0,
-    }));
-  }
-
-  private async getSummaryWonLost(opportunities: Opportunity[]) {
-    let wonCount = 0;
-    let lostCount = 0;
-
-    const summary = opportunities.map((o) => {
-      const isWon = !!o.wonDate;
-      if (isWon) wonCount++;
-      else lostCount++;
-
-      return {
-        key: o.opportunityId,
-        status: isWon ? 'Won' : 'Lost',
-        date: o.wonDate || o.lostDate || 'Unknown',
-        property: o.propertyName || 'Unknown',
-        division: o.divisionName || 'Unknown',
-        name: o.salesRepContactName || 'Unknown',
-        estHrs: o.estimatedLaborHours || 0,
-        estProfit: o.estimatedNetProfitPercent || 0,
-      };
-    });
-
-    const total = wonCount + lostCount;
-    const wonPercentage = total > 0 ? (wonCount / total) * 100 : 0;
-    const lostPercentage = total > 0 ? (lostCount / total) * 100 : 0;
-
-    return {
-      table: summary,
-      chart: [wonPercentage, lostPercentage],
-      total,
-    };
   }
 }

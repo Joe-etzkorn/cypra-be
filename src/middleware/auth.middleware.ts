@@ -3,7 +3,11 @@ import AWS from 'aws-sdk';
 import { sendResponse } from '../utils/response';
 import { Message } from '../enums/message.enum';
 import { AwsRole } from '../enums/role.enum';
-import { CognitoUser } from '../interfaces/user.interface';
+import {
+  AdminAuthenticatedRequest,
+  CognitoUser,
+} from '../interfaces/user.interface';
+import User from '../models/user.model';
 
 const cognito = new AWS.CognitoIdentityServiceProvider({
   region: process.env.AWS_REGION,
@@ -14,16 +18,13 @@ const cognito = new AWS.CognitoIdentityServiceProvider({
   // ),
 });
 
-interface AuthenticatedRequest extends Request {
-  user?: string | object;
-}
-
 const authenticateUser = async (
-  req: AuthenticatedRequest,
+  req: AdminAuthenticatedRequest,
   res: Response,
   next: NextFunction,
   role: AwsRole[],
 ): Promise<void> => {
+
   const authHeader = req.headers['authorization'];
   const token = authHeader?.split(' ')[1];
 
@@ -46,8 +47,8 @@ const authenticateUser = async (
     const groupData = await cognito
       .adminListGroupsForUser(groupParams)
       .promise();
-    const userGroup = groupData.Groups?.find(
-      (group) => role.includes(group.GroupName as AwsRole),
+    const userGroup = groupData.Groups?.find((group) =>
+      role.includes(group.GroupName as AwsRole),
     );
     if (!userGroup) {
       sendResponse(res, 401, false, Message.UNAUTHORIZED);
@@ -58,11 +59,23 @@ const authenticateUser = async (
       return acc;
     }, {});
 
+    const dbUser = await User.findOne({
+      where: {
+        userCognitoId: userAttributes['sub'],
+      },
+    });
+
+    if (!dbUser) {
+      sendResponse(res, 401, false, Message.UNAUTHORIZED);
+      return;
+    }
+
     req.user = {
       sub: userAttributes['sub'],
       email: userAttributes['email'],
       given_name: userAttributes['given_name'],
       family_name: userAttributes['family_name'],
+      dbUser: dbUser
     } as CognitoUser;
 
     next();
@@ -79,13 +92,13 @@ const authenticateUser = async (
 };
 
 export const SuperAdminAuthMiddleware = (
-  req: AuthenticatedRequest,
+  req: AdminAuthenticatedRequest,
   res: Response,
   next: NextFunction,
 ) => authenticateUser(req, res, next, [AwsRole.SUPER_ADMIN]);
 
 export const AdminAuthMiddleware = (
-  req: AuthenticatedRequest,
+  req: AdminAuthenticatedRequest,
   res: Response,
   next: NextFunction,
 ) => authenticateUser(req, res, next, [AwsRole.ADMIN, AwsRole.USER]);

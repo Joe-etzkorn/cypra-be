@@ -4,21 +4,9 @@ import { CognitoUser } from '../interfaces/user.interface';
 import User from '../models/user.model';
 
 export class SalesDashboardService {
-  async getDashboardData(
-    cognitoUser: CognitoUser,
-    _filters: any,
-  ): Promise<any> {
+  async getDashboardData(cognitoUser: CognitoUser, _filter: any): Promise<any> {
     try {
-      const user = await User.findOne({
-        where: {
-          userCognitoId: cognitoUser.sub,
-        },
-      });
-
-      if (!user) {
-        return null;
-      }
-      const response = await this.calculate(user.id);
+      const response = await this.calculate(cognitoUser.dbUser.id);
       return response;
     } catch (error) {
       console.error('Error getting sales dashboard:', error);
@@ -46,7 +34,7 @@ export class SalesDashboardService {
       0,
     );
 
-    const estimatedGrossMarginPercent =
+    const estimatedGrossMarginPercent = await
       this.calculateEstimatedGrossMarginByOpportunities(opportunities);
 
     return {

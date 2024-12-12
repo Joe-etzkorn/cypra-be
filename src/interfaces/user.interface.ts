@@ -1,3 +1,6 @@
+import { Request } from 'express';
+import User from '../models/user.model';
+
 export interface CreateUserInput {
   email: string;
   password: string;
@@ -19,4 +22,9 @@ export interface CognitoUser {
   email: string;
   given_name: string;
   family_name: string;
+  dbUser: User;
+}
+
+export interface AdminAuthenticatedRequest extends Request {
+  user?: CognitoUser;
 }
