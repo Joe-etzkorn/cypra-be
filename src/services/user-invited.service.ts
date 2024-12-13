@@ -90,7 +90,7 @@ export class UserInviteService {
           {
             model: User,
             as: 'invitedUser',
-            attributes: ['id', 'email', 'firstName', 'lastName'],
+            attributes: ['id', 'email', 'firstName', 'lastName', 'companyName']
           },
         ],
       });
