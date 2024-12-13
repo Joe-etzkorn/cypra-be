@@ -9,7 +9,7 @@ export class OperationsReportOpportunitiesCompletedService {
     _filter: any,
   ): Promise<any> {
     try {
-      const response = await this.calculate(cognitoUser.dbUser.id);
+      const response = await this.calculate(cognitoUser.companyId);
       return response;
     } catch (error) {
       console.error('Error getting operations dashboard:', error);
@@ -24,7 +24,7 @@ export class OperationsReportOpportunitiesCompletedService {
     try {
       const totalWon = await Opportunity.count({
         where: {
-          companyId: cognitoUser.dbUser.id,
+          companyId: cognitoUser.companyId,
           opportunityStatusName: 'Won',
           completeDate: {
             [Op.ne]: null,
@@ -33,7 +33,7 @@ export class OperationsReportOpportunitiesCompletedService {
       });
       const wonOpportunities = await Opportunity.findAll({
         where: {
-          companyId: cognitoUser.dbUser.id,
+          companyId: cognitoUser.companyId,
           opportunityStatusName: 'Won',
           completeDate: {
             [Op.ne]: null,

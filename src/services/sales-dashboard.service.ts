@@ -6,7 +6,7 @@ import User from '../models/user.model';
 export class SalesDashboardService {
   async getDashboardData(cognitoUser: CognitoUser, _filter: any): Promise<any> {
     try {
-      const response = await this.calculate(cognitoUser.dbUser.id);
+      const response = await this.calculate(cognitoUser.companyId);
       return response;
     } catch (error) {
       console.error('Error getting sales dashboard:', error);

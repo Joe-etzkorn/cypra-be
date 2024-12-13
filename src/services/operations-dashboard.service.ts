@@ -8,7 +8,7 @@ import db from '../utils/db';
 export class OperationsDashboardService {
   async getDashboardData(cognitoUser: CognitoUser, _filter: any): Promise<any> {
     try {
-      const response = await this.calculate(cognitoUser.dbUser.id);
+      const response = await this.calculate(cognitoUser.companyId);
       return response;
     } catch (error) {
       console.error('Error getting operations dashboard:', error);
@@ -163,7 +163,7 @@ export class OperationsDashboardService {
           count(*)
         FROM 
           work_tickets wt
-        WHERE wt."companyId" = ${cognitoUser.dbUser.id}
+        WHERE wt."companyId" = ${cognitoUser.companyId}
         GROUP BY 
           wt."crewLeaderContactName", wt."companyId"
       `);
@@ -179,7 +179,7 @@ export class OperationsDashboardService {
           AVG(CASE WHEN wt."earnedRevenue" > 0 THEN (wt."earnedRevenue" - wt."totalCostAct") / wt."earnedRevenue" ELSE 0 END) * 100 AS "actualGMPercent"
         FROM 
           work_tickets wt
-        WHERE wt."companyId" = ${cognitoUser.dbUser.id}
+        WHERE wt."companyId" = ${cognitoUser.companyId}
         GROUP BY 
           wt."crewLeaderContactName", wt."companyId"
 		    ORDER BY SUM(wt."earnedRevenue") DESC
@@ -213,7 +213,7 @@ export class OperationsDashboardService {
           work_tickets wt ON wtt."workTicketId" = wt."workTicketId" AND wtt."companyId" = wt."companyId"
         INNER JOIN 
           opportunity_services os ON wt."opportunityServiceId" = os."opportunityServiceId"
-        WHERE wtt."companyId" = ${cognitoUser.dbUser.id}
+        WHERE wtt."companyId" = ${cognitoUser.companyId}
         GROUP BY 
           os."displayName", wtt."companyId"
       `);
@@ -234,7 +234,7 @@ export class OperationsDashboardService {
           work_tickets wt ON wtt."workTicketId" = wt."workTicketId" AND wtt."companyId" = wt."companyId"
         INNER JOIN 
           opportunity_services os ON wt."opportunityServiceId" = os."opportunityServiceId"
-        WHERE wtt."companyId" = ${cognitoUser.dbUser.id}
+        WHERE wtt."companyId" = ${cognitoUser.companyId}
         GROUP BY 
           os."displayName", wtt."companyId"
         ORDER BY SUM(wt."earnedRevenue") DESC

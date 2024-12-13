@@ -7,7 +7,7 @@ import { DEFAULT_LIMIT, DEFAULT_PAGE } from '../utils/common';
 export class SalesReportOpportunitiesWonService {
   async getDashboardData(cognitoUser: CognitoUser, _filter: any): Promise<any> {
     try {
-      const response = await this.calculate(cognitoUser.dbUser.id);
+      const response = await this.calculate(cognitoUser.companyId);
       return response;
     } catch (error) {
       console.error('Error getting sales dashboard:', error);
@@ -22,13 +22,13 @@ export class SalesReportOpportunitiesWonService {
     try {
       const totalWon = await Opportunity.count({
         where: {
-          companyId: cognitoUser.dbUser.id,
+          companyId: cognitoUser.companyId,
           opportunityStatusName: 'Won',
         },
       });
       const wonOpportunities = await Opportunity.findAll({
         where: {
-          companyId: cognitoUser.dbUser.id,
+          companyId: cognitoUser.companyId,
           opportunityStatusName: 'Won',
         },
         limit,

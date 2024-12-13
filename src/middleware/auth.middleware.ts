@@ -70,12 +70,26 @@ const authenticateUser = async (
       return;
     }
 
+    let companyId = dbUser.id;
+    if (dbUser.roleId === 3) {
+      const admin = await User.findOne({
+        where: {
+          id: dbUser.parentId,
+        },
+      });
+      if (!admin) {
+        sendResponse(res, 401, false, Message.UNAUTHORIZED);
+        return;
+      }
+      companyId = admin?.id;
+    }
     req.user = {
       sub: userAttributes['sub'],
       email: userAttributes['email'],
       given_name: userAttributes['given_name'],
       family_name: userAttributes['family_name'],
-      dbUser: dbUser
+      dbUser: dbUser,
+      companyId: companyId,
     } as CognitoUser;
 
     next();

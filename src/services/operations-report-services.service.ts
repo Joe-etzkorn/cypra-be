@@ -49,7 +49,7 @@ export class OperationsReportServicesService {
       // Fetch won opportunities
       const opportunities: Opportunity[] = await Opportunity.findAll({
         where: {
-          companyId: cognitoUser.dbUser.id,
+          companyId: cognitoUser.companyId,
           opportunityStatusName: 'Won',
         },
         attributes: [

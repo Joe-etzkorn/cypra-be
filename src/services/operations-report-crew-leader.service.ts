@@ -47,7 +47,7 @@ type CrewLeaderReportDataType = {
 export class OperationsReportCrewLeaderService {
   async getDashboardData(cognitoUser: CognitoUser, _filter: any): Promise<any> {
     try {
-      const response = await this.calculate(cognitoUser.dbUser.id);
+      const response = await this.calculate(cognitoUser.companyId);
       return response;
     } catch (error) {
       console.error('Error getting operations dashboard:', error);
@@ -124,7 +124,7 @@ export class OperationsReportCrewLeaderService {
     try {
       const opportunities: Opportunity[] = await Opportunity.findAll({
         where: {
-          companyId: cognitoUser.dbUser.id,
+          companyId: cognitoUser.companyId,
         },
         attributes: [
           'opportunityId',
@@ -279,7 +279,7 @@ export class OperationsReportCrewLeaderService {
         FROM 
           work_tickets
         WHERE 
-          "companyId" = ${cognitoUser.dbUser.id} AND
+          "companyId" = ${cognitoUser.companyId} AND
           "workTicketStatus" = 'Complete'
         GROUP BY 
           "crewLeaderContactName"
@@ -308,7 +308,7 @@ export class OperationsReportCrewLeaderService {
         FROM 
           work_tickets
         WHERE 
-          "companyId" = ${cognitoUser.dbUser.id} AND
+          "companyId" = ${cognitoUser.companyId} AND
           "workTicketStatus" = 'Complete'
         GROUP BY 
           "crewLeaderContactName"

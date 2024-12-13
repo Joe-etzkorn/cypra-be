@@ -23,6 +23,7 @@ export interface CognitoUser {
   given_name: string;
   family_name: string;
   dbUser: User;
+  companyId: number;
 }
 
 export interface AdminAuthenticatedRequest extends Request {

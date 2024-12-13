@@ -24,7 +24,7 @@ export class SalesReportPipelineService {
     try {
       const opportunities = await Opportunity.findAll({
         where: {
-          companyId: cognitoUser.dbUser.id,
+          companyId: cognitoUser.companyId,
         },
       });
       const grouped = this.groupOpportunities(opportunities);
@@ -61,7 +61,7 @@ export class SalesReportPipelineService {
     try {
       const opportunities = await Opportunity.findAll({
         where: {
-          companyId: cognitoUser.dbUser.id,
+          companyId: cognitoUser.companyId,
           opportunityStatusName: type === 'bidding' ? 'Bidding' : 'Delivered',
         },
         limit,
@@ -104,26 +104,26 @@ export class SalesReportPipelineService {
       const [wonTotal, lostTotal, total] = await Promise.all([
         Opportunity.count({
           where: {
-            companyId: cognitoUser.dbUser.id,
+            companyId: cognitoUser.companyId,
             opportunityStatusName: 'Won',
           },
         }),
         Opportunity.count({
           where: {
-            companyId: cognitoUser.dbUser.id,
+            companyId: cognitoUser.companyId,
             opportunityStatusName: 'Lost',
           },
         }),
         Opportunity.count({
           where: {
-            companyId: cognitoUser.dbUser.id,
+            companyId: cognitoUser.companyId,
           }
         }),
       ]);
 
       const opportunities = await Opportunity.findAll({
         where: {
-          companyId: cognitoUser.dbUser.id,
+          companyId: cognitoUser.companyId,
           opportunityStatusName: {
             [Op.in]: ['Won', 'Lost'],
           },
