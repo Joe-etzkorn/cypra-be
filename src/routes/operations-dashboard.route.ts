@@ -10,6 +10,38 @@ router.get(
   AdminAuthMiddleware,
   operationDashboardController.getDashboardData,
 );
+router.get(
+  '/crew-report-table',
+  AdminAuthMiddleware,
+  operationDashboardController.getCrewReportsTable,
+);
+router.get(
+  '/top-services-table',
+  AdminAuthMiddleware,
+  operationDashboardController.getTopServicesReportTable,
+);
+
+
+router.get(
+  '/report/crew-leader',
+  AdminAuthMiddleware,
+  operationDashboardController.getCrewLeaderReport,
+);
+router.get(
+  '/report/crew-leader/table-view',
+  AdminAuthMiddleware,
+  operationDashboardController.getCrewLeaderTable,
+);
+router.get(
+  '/report/crew-leader/chart-efficiency-warranty-hours',
+  AdminAuthMiddleware,
+  operationDashboardController.getChartLaborEfficiencyAndWarrantyHours,
+);
+router.get(
+  '/report/crew-leader/chart-efficiency-earned-revenue',
+  AdminAuthMiddleware,
+  operationDashboardController.getChartLaborEfficiencyAndEarnedRevenue,
+);
 
 router.get(
   '/report/services',

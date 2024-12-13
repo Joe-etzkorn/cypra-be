@@ -35,7 +35,7 @@ const getWorkTickets = async (companyId: number, accessToken: string) => {
         workTicketStatusId: workTicket.WorkTicketStatusID,
         workTicketStatusName: workTicket.WorkTicketStatusName,
         crewLeaderContactId: workTicket.CrewLeaderContactID,
-        crewLeaderContactName: workTicket.CrewLeaderContactName,
+        crewLeaderContactName: workTicket.CrewLeaderName,
         hoursEst: workTicket.HoursEst,
         hourCostEst: workTicket.HourCostEst,
         materialCostEst: workTicket.MaterialCostEst,

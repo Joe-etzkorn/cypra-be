@@ -28,27 +28,22 @@ interface OpportunityServiceType {
   displayName: string | null;
   serviceId: number | null;
   opportunityId: number | null;
-  service?: ServiceType;
 }
 
-interface ServiceType {
-  serviceId: number;
-  serviceName: string;
-}
 type ServicesReportDataType = {
   key: string;
   serviceName: string;
-  earnedRevenue: string;
-  estimatedHours: string;
-  hours: string;
-  laborVariance: string;
-  grossProfit: string;
-  estimatedGrossMargin: string;
-  grossMargin: string;
-  percentVariance: string;
+  earnedRevenue: number;
+  estimatedHours: number;
+  hours: number;
+  laborVariance: number;
+  grossProfit: number;
+  estimatedGrossMargin: number;
+  grossMargin: number;
+  percentVariance: number;
   children?: ServicesReportDataType[];
 };
-export class OperationsReportServiceService {
+export class OperationsReportServicesService {
   async getReportServices(cognitoUser: CognitoUser): Promise<any> {
     try {
       // Fetch won opportunities
@@ -66,7 +61,6 @@ export class OperationsReportServiceService {
           'estimatedCostDollars',
           'actualCostDollars',
         ],
-        limit: 10,
       });
 
       // Fetch opportunity services
@@ -85,27 +79,11 @@ export class OperationsReportServiceService {
           ],
         });
 
-      // Fetch services
-      const services: Service[] = await Service.findAll({
-        where: {
-          serviceId: {
-            [Op.in]: opportunityServices.map((os) => os.serviceId),
-          },
-        },
-        attributes: ['serviceId', 'serviceName'],
-      });
-
       // Map relationships manually
       const wonOpportunities: OpportunityType[] = opportunities.map(
         (opportunity: Opportunity) => {
           const relatedServices = opportunityServices
             .filter((os) => os.opportunityId === opportunity.opportunityId)
-            .map((os) => ({
-              ...os,
-              service: services.find(
-                (service) => service.serviceId === os.serviceId,
-              ),
-            }));
 
           return {
             ...opportunity.dataValues,
@@ -151,14 +129,14 @@ export class OperationsReportServiceService {
           estimatedHours > 0 ? (laborVariance / estimatedHours) * 100 : 0;
 
         return {
-          earnedRevenue: earnedRevenue.toFixed(2),
-          estimatedHours: estimatedHours.toFixed(2),
-          hours: actualHours.toFixed(2),
-          laborVariance: laborVariance.toFixed(2),
-          grossProfit: grossProfit.toFixed(2),
-          estimatedGrossMargin: `${estimatedGrossMargin.toFixed(2)}%`,
-          grossMargin: `${grossMargin.toFixed(2)}%`,
-          percentVariance: `${percentVariance.toFixed(2)}%`,
+          earnedRevenue: earnedRevenue,
+          estimatedHours: estimatedHours,
+          hours: actualHours,
+          laborVariance: laborVariance,
+          grossProfit: grossProfit,
+          estimatedGrossMargin: estimatedGrossMargin,
+          grossMargin: grossMargin,
+          percentVariance: percentVariance,
         };
       };
       const groupedByServiceName: GroupedByServiceName =
@@ -167,9 +145,9 @@ export class OperationsReportServiceService {
             const { opportunityServices } = opportunity;
             if (!opportunityServices) return result;
 
-            opportunityServices.forEach(({ service }) => {
-              if (!service) return;
-              const serviceName = service.serviceName;
+            opportunityServices.forEach(({ displayName }) => {
+              if (!displayName) return;
+              const serviceName = displayName;
               if (!serviceName) return;
 
               if (!result[serviceName]) result[serviceName] = {};
@@ -180,7 +158,7 @@ export class OperationsReportServiceService {
                 result[serviceName][opportunity.propertyName] = [];
               }
 
-              result[serviceName][opportunity.propertyName].push(opportunity);
+              result[serviceName][opportunity.propertyName].push({...opportunity, opportunityServices: undefined});
             });
 
             return result;
