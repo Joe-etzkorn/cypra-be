@@ -23,7 +23,7 @@ module.exports = {
       //   updatedAt: new Date(),
       // },
       {
-        email: 'marshalljohnsonp@gmail.com',
+        email: 'etzkornjoe@gmail.com',
         password: hashedPassword,
         firstName: 'Super',
         lastName: 'Admin 2',
